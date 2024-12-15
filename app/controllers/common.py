@@ -3,6 +3,8 @@ from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
+CORRELATION_ID_HEADER = "X-Correlation-ID"
+
 
 class APIError(BaseModel):
     description: str
@@ -16,7 +18,7 @@ async def customer_error_handler(request: Request, err: CustomError):
         content=APIError(
             description=str(err),
             detail=str(err),
-            correlation_id="",
+            correlation_id=request.headers.get(CORRELATION_ID_HEADER),
         ).model_dump(),
     )
 
@@ -27,6 +29,6 @@ async def global_error_handler(request: Request, err: Exception):
         content=APIError(
             description="Unexpected error",
             detail=str(err),
-            correlation_id="",
+            correlation_id=request.headers.get(CORRELATION_ID_HEADER),
         ).model_dump(),
     )

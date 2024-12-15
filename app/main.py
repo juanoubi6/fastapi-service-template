@@ -1,8 +1,10 @@
 from configs import settings
 from controllers import api_router
 from controllers.common import customer_error_handler, global_error_handler
+from controllers.middlewares import CorrelationIDMiddleware
 from exceptions import CustomError
 from fastapi import FastAPI
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.routing import APIRoute
 from starlette.middleware.cors import CORSMiddleware
 
@@ -26,6 +28,10 @@ if settings.all_cors_origins:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+# Add middlewares
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+app.add_middleware(CorrelationIDMiddleware)
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
