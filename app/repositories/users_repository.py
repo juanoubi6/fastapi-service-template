@@ -24,12 +24,20 @@ class UserRepository:
         user = User(
             name=data.name,
             company=data.company,
-            addresses=[
-                Address(address_1=addr.address_1)
-                for addr in data.addresses
-            ]
         )
+
+        if data.addresses:
+            user.addresses = [Address(address_1=addr.address_1)for addr in data.addresses]
+
         db.add(user)
         await db.flush()
 
         return user
+
+    async def get_user_by_id(self, db: AsyncSession, user_id: int, for_update: bool = False) -> User | None:
+        query = select(User).where(User.id == user_id)
+
+        if for_update:
+            query = query.with_for_update()
+
+        return await db.scalar(query)

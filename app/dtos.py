@@ -55,4 +55,9 @@ class CreateAddressDTO(BaseModel):
 class CreateUserDTO(BaseModel):
     name: str
     company: Optional[str] = None
-    addresses: List[CreateAddressDTO]
+    addresses: Optional[List[CreateAddressDTO]] = None
+
+
+class UpdateUserDTO(BaseModel):
+    name: Optional[str] = None
+    company: Optional[str] = None
