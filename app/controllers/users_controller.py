@@ -1,22 +1,39 @@
-from typing import Any, List
+from typing import Annotated, Any
 
-from fastapi import APIRouter, HTTPException
-from models import UserDTO
-from pydantic import BaseModel
-from services import users_service
+from database import AsyncSessionDep
+from dtos import CreateUserDTO, Page, UserDTO, UserFiltersDTO
+from fastapi import APIRouter, HTTPException, Query
+from repositories.users_repository import UserRepository
+from services.users_service import UserService
 
 router = APIRouter(prefix="/users", tags=["users"])
 
+user_repository = UserRepository()
+user_service = UserService(user_repository)
 
-class UsersResponse(BaseModel):
-    data: List[UserDTO]
 
-
-@router.get("/", response_model=UsersResponse)
-async def get_all_users() -> Any:
+@router.get("/", response_model=Page[UserDTO])
+async def get_users(filters:  Annotated[UserFiltersDTO, Query()], db: AsyncSessionDep) -> Any:
     try:
-        users = await users_service.get_users()
-    except Exception:
-        raise HTTPException(status_code=500, detail="Unexpected error when retrieving users")
+        paged_users = await user_service.get_users(db, filters)
+    except Exception as err:
+        raise HTTPException(status_code=500, detail=f"Unexpected error when retrieving users: {str(err)}")
 
-    return UsersResponse(data=[UserDTO.from_user(user) for user in users])
+    page = Page(
+        page=filters.page,
+        page_size=filters.page_size,
+        total_records=paged_users.total_records,
+        data=[await UserDTO.from_user(user) for user in paged_users.data],
+    )
+
+    return page
+
+
+@router.post("/", response_model=UserDTO)
+async def create_user(data: CreateUserDTO, db: AsyncSessionDep) -> Any:
+    try:
+        user = await user_service.create_user(db, data)
+    except Exception as err:
+        raise HTTPException(status_code=500, detail=f"Unexpected error when creating user: {str(err)}")
+
+    return await UserDTO.from_user(user)

@@ -1,14 +1,29 @@
-from typing import List, Optional
+from typing import Generic, List, Optional, TypeVar
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy import BigInteger, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.ext.asyncio import AsyncAttrs
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
-Base = declarative_base()
+T = TypeVar('T')
 
 
-class User(Base):
+class BaseDBModel(DeclarativeBase, AsyncAttrs):
+    pass
+
+
+class PagedResult(BaseModel, Generic[T]):
+    total_records: int
+    data: List[T]
+
+    model_config = ConfigDict(
+        from_attributes=True,
+        arbitrary_types_allowed=True,
+        populate_by_name=True
+    )
+
+
+class User(BaseDBModel):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
@@ -20,7 +35,7 @@ class User(Base):
     )
 
 
-class Address(Base):
+class Address(BaseDBModel):
     __tablename__ = "addresses"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)

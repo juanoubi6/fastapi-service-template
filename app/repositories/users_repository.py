@@ -1,11 +1,35 @@
-from typing import List
-
-from database import AsyncSessionDep
-from models import User
+from dtos import CreateUserDTO, UserFiltersDTO
+from models import Address, PagedResult, User
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+from utilities import execute_paginated_query
 
 
-async def get_all_users(db: AsyncSessionDep) -> List[User]:
-    stmt = select(User)
+class UserRepository:
 
-    await db.scalars(stmt).all()
+    def __init__(self):
+        pass
+
+    async def get_users(self, db: AsyncSession, filters: UserFiltersDTO) -> PagedResult[User]:
+        query = select(User).options(selectinload(User.addresses)).order_by(User.id)
+
+        if filters.name:
+            query = query.where(User.name == filters.name)
+
+        return await execute_paginated_query(db, query, filters)
+
+    async def create_user(self, db: AsyncSession, data: CreateUserDTO) -> User:
+        # Create user
+        user = User(
+            name=data.name,
+            company=data.company,
+            addresses=[
+                Address(address_1=addr.address_1)
+                for addr in data.addresses
+            ]
+        )
+        db.add(user)
+        await db.flush()
+
+        return user
