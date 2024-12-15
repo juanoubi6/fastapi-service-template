@@ -1,7 +1,39 @@
+from dataclasses import dataclass
+from typing import Annotated, AsyncGenerator
+
+from controllers.common import CORRELATION_ID_HEADER
+from database import async_session_local
 from dtos import BasePaginationFilters
+from fastapi import Depends, Request
 from models import PagedResult
 from sqlalchemy import Select, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+
+
+@dataclass
+class Context:
+    db: AsyncSession
+    correlation_id: str
+
+
+async def get_context(request: Request) -> AsyncGenerator:
+    """
+    Build a context with a sqlalchemy session
+    """
+    session = async_session_local()
+
+    context = Context(
+        db=session,
+        correlation_id=request.headers.get(CORRELATION_ID_HEADER),
+    )
+
+    try:
+        yield context
+    finally:
+        await session.close()
+
+
+ContextDep = Annotated[Context, Depends(get_context)]
 
 
 async def execute_paginated_query(db: AsyncSession, query: Select, filters: BasePaginationFilters) -> PagedResult:
