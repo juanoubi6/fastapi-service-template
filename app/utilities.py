@@ -1,13 +1,14 @@
 from dataclasses import dataclass
 from typing import Annotated, AsyncGenerator
 
-from controllers.common import CORRELATION_ID_HEADER
-from database import async_session_local
-from dtos import BasePaginationFilters
 from fastapi import Depends, Request
-from models import PagedResult
 from sqlalchemy import Select, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.controllers.common import CORRELATION_ID_HEADER
+from app.database import async_session_local
+from app.dtos import BasePaginationFilters
+from app.models import PagedResult
 
 
 @dataclass

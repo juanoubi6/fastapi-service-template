@@ -1,7 +1,8 @@
-from exceptions import CustomError
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+
+from app.exceptions import CustomError
 
 CORRELATION_ID_HEADER = "X-Correlation-ID"
 

@@ -1,9 +1,10 @@
-from dtos import CreateUserDTO, UserFiltersDTO
-from models import Address, PagedResult, User
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from utilities import execute_paginated_query
+
+from app.dtos import CreateUserDTO, UserFiltersDTO
+from app.models import Address, PagedResult, User
+from app.utilities import execute_paginated_query
 
 
 class UserRepository:

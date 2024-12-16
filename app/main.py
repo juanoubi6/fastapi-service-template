@@ -1,12 +1,13 @@
-from configs import settings
-from controllers import api_router
-from controllers.common import customer_error_handler, global_error_handler
-from controllers.middlewares import CorrelationIDMiddleware
-from exceptions import CustomError
 from fastapi import FastAPI
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.routing import APIRoute
 from starlette.middleware.cors import CORSMiddleware
+
+from app.configs import settings
+from app.controllers import api_router
+from app.controllers.common import customer_error_handler, global_error_handler
+from app.controllers.middlewares import CorrelationIDMiddleware
+from app.exceptions import CustomError
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:

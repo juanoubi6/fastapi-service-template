@@ -1,10 +1,12 @@
 from typing import Annotated, Any
 
-from dtos import CreateUserDTO, Page, UpdateUserDTO, UserDTO, UserFiltersDTO
 from fastapi import APIRouter, Query
-from repositories.users_repository import UserRepository
-from services.users_service import UserService
-from utilities import ContextDep
+
+from app.dtos import (CreateUserDTO, Page, UpdateUserDTO, UserDTO,
+                      UserFiltersDTO)
+from app.repositories.users_repository import UserRepository
+from app.services.users_service import UserService
+from app.utilities import ContextDep
 
 router = APIRouter(prefix="/users", tags=["users"])
 

@@ -1,7 +1,8 @@
 from typing import Generic, List, Optional, TypeVar
 
-from models import Address, User
 from pydantic import BaseModel
+
+from app.models import Address, User
 
 T = TypeVar('T')
 

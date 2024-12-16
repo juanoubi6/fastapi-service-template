@@ -1,8 +1,8 @@
-from dtos import CreateUserDTO, UpdateUserDTO, UserFiltersDTO
-from exceptions import ResourceNotFoundError
-from models import PagedResult, User
-from repositories.users_repository import UserRepository
-from utilities import Context
+from app.dtos import CreateUserDTO, UpdateUserDTO, UserFiltersDTO
+from app.exceptions import ResourceNotFoundError
+from app.models import PagedResult, User
+from app.repositories.users_repository import UserRepository
+from app.utilities import Context
 
 
 class UserService:
