@@ -17,9 +17,8 @@ async def db() -> AsyncGenerator[AsyncSession, None, None]:
     # Get and configure alembic cfg
     # Override the sqlalchemy.url and script_location in alembic.ini
     # As the tests are inside the app directory, we need to go up one level
-    alembic_cfg = Config('../alembic.ini')
+    alembic_cfg = Config('alembic.ini')
     alembic_cfg.set_main_option("sqlalchemy.url", str(settings.SQLALCHEMY_DATABASE_URI))
-    alembic_cfg.set_main_option("script_location", "../alembic")
 
     # Run all migrations up to head
     command.upgrade(alembic_cfg, "head")

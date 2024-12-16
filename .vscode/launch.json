@@ -21,11 +21,11 @@
             "request": "launch",
             "module": "pytest",
             "args": [
-                "tests",
+                "app/tests",
                 "-v",
                 "-s"
             ],
-            "cwd": "${workspaceFolder}/app",
+            "cwd": "${workspaceFolder}",
             "justMyCode": true,
             "console": "integratedTerminal"
         },
