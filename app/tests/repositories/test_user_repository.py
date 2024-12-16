@@ -38,7 +38,7 @@ class Test_UserRepository:
         assert created_user.name == payload.name
         assert len(created_user.addresses) == 2
 
-    @ pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def test_get_users_success(self, db: AsyncSession, user_repository: UserRepository, test_data: dict):
         test_user = test_data['test_user']
 
