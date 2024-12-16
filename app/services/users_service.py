@@ -13,8 +13,10 @@ class UserService:
         return await self.user_repository.get_users(ctx.db, filters)
 
     async def create_user(self, ctx: Context, data: CreateUserDTO) -> User:
-        async with ctx.db.begin():
-            return await self.user_repository.create_user(ctx.db, data)
+        new_user = await self.user_repository.create_user(ctx.db, data)
+        await ctx.db.commit()  # Commit to flush the changes and effectively create the user
+
+        return new_user
 
     async def get_user(self, ctx: Context, user_id: int) -> User:
         user = await self.user_repository.get_user_by_id(ctx.db, user_id)
@@ -24,22 +26,23 @@ class UserService:
         return user
 
     async def update_user(self, ctx: Context, user_id: int, data: UpdateUserDTO) -> User:
-        async with ctx.db.begin():
-            user = await self.user_repository.get_user_by_id(ctx.db, user_id, for_update=True)
+        user = await self.user_repository.get_user_by_id(ctx.db, user_id, for_update=True)
 
-            if not user:
-                raise ResourceNotFoundError("User", user_id)
+        if not user:
+            raise ResourceNotFoundError("User", user_id)
 
-            user.name = data.name
-            user.company = data.company
+        user.name = data.name
+        user.company = data.company
+
+        await ctx.db.commit()  # Flushes the changes and commit the TX
 
         return user
 
     async def delete_user(self, ctx: Context, user_id: int):
-        async with ctx.db.begin():
-            user = await self.user_repository.get_user_by_id(ctx.db, user_id, for_update=True)
+        user = await self.user_repository.get_user_by_id(ctx.db, user_id, for_update=True)
 
-            if not user:
-                raise ResourceNotFoundError("User", user_id)
+        if not user:
+            raise ResourceNotFoundError("User", user_id)
 
-            await ctx.db.delete(user)
+        await ctx.db.delete(user)
+        await ctx.db.commit()
