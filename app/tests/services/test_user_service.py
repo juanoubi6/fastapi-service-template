@@ -7,13 +7,12 @@ from app.repositories.users_repository import UserRepository
 from app.services.users_service import UserService
 
 
-@pytest_asyncio.fixture(scope='class', autouse=True)
-async def user_service():
-    user_repository = UserRepository()
-    return UserService(user_repository)
-
-
 class Test_UserService:
+
+    @pytest_asyncio.fixture(scope='class', autouse=True)
+    async def user_service(self):
+        user_repository = UserRepository()
+        return UserService(user_repository)
 
     @pytest.mark.asyncio
     async def test_create_user_success(self, ctx: Context, user_service: UserService):
