@@ -1,6 +1,6 @@
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, status
 
 from app.dtos import (CreateUserDTO, Page, UpdateUserDTO, UserDTO,
                       UserFiltersDTO)
@@ -35,7 +35,7 @@ async def get_user(user_id: int, ctx: ContextDep) -> Any:
     return await UserDTO.from_user(user)
 
 
-@router.post("/", response_model=UserDTO)
+@router.post("/", response_model=UserDTO, status_code=status.HTTP_201_CREATED)
 async def create_user(data: CreateUserDTO, ctx: ContextDep) -> Any:
     user = await user_service.create_user(ctx, data)
 
