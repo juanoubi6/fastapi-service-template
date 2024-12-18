@@ -20,7 +20,9 @@ class Test_UserService:
         }
 
     @pytest.mark.asyncio
-    async def test_create_user_success(self, client: TestClient, test_data: dict, monkeypatch):
+    async def test_create_user_success(
+        self, client: TestClient, authorization_headers: dict, test_data: dict, monkeypatch
+    ):
         mock_user_service = AsyncMock()
         mock_user_service.create_user.return_value = test_data['test_user']
         monkeypatch.setattr(users_controller, "user_service", mock_user_service)
@@ -34,7 +36,7 @@ class Test_UserService:
             ]
         }
 
-        response = client.post(f"{settings.API_V1_STR}/users", json=payload)
+        response = client.post(f"{settings.API_V1_STR}/users", json=payload, headers=authorization_headers)
         content = response.json()
 
         assert response.status_code == 201
@@ -42,7 +44,9 @@ class Test_UserService:
         assert mock_user_service.create_user.call_count == 1
 
     @pytest.mark.asyncio
-    async def test_get_users_success(self, client: TestClient, test_data: dict, monkeypatch):
+    async def test_get_users_success(
+        self, client: TestClient, authorization_headers: dict, test_data: dict, monkeypatch
+    ):
         mock_user_service = AsyncMock()
         mock_user_service.get_users.return_value = PagedResult(
             total_records=1,
@@ -57,7 +61,7 @@ class Test_UserService:
             "name": "name",
         }
 
-        response = client.get(f"{settings.API_V1_STR}/users", params=filters)
+        response = client.get(f"{settings.API_V1_STR}/users", headers=authorization_headers, params=filters)
         content = response.json()
 
         assert response.status_code == 200

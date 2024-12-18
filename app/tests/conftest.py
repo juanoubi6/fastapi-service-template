@@ -1,14 +1,16 @@
+import uuid
 from collections.abc import AsyncGenerator, Generator
 
 import pytest_asyncio
+from alembic import command
+from alembic.config import Config
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from alembic import command
-from alembic.config import Config
 from app.configs import settings
 from app.database import async_session_local
 from app.main import app
+from app.models import User
 from app.utilities import Context
 
 
@@ -30,11 +32,33 @@ async def db() -> AsyncGenerator[AsyncSession, None, None]:
         await session.close()
 
 
+@pytest_asyncio.fixture(scope="session", autouse=True)
+async def request_user(db: AsyncSession) -> User:
+    # Create a test user and return it
+    user = User(
+        name=str(uuid.uuid4()),
+        company="Mock User Company",
+    )
+
+    db.add(user)
+    await db.commit()
+
+    return user
+
+
+@pytest_asyncio.fixture(scope="session", autouse=True)
+async def authorization_headers(request_user: User) -> dict[str, str]:
+    return {
+        "Authorization": str(request_user.id)
+    }
+
+
 @pytest_asyncio.fixture(scope="function")
-async def ctx(db: AsyncSession) -> AsyncGenerator[Context, None, None]:
-    yield Context(
+async def ctx(db: AsyncSession, request_user: User) -> Context:
+    return Context(
         db=db,
         correlation_id="test_correlation_id",
+        current_user=request_user,
     )
 
 

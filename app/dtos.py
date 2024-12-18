@@ -2,7 +2,7 @@ from typing import Generic, List, Optional, TypeVar
 
 from pydantic import BaseModel
 
-from app.models import Address, User
+from app.models import Address, Task, User
 
 T = TypeVar('T')
 
@@ -28,7 +28,7 @@ class AddressDTO(BaseModel):
     id: int
     address_1: str
 
-    def from_address(address: Address) -> "AddressDTO":
+    def from_model(address: Address) -> "AddressDTO":
         return AddressDTO(id=address.id, address_1=address.address_1)
 
 
@@ -38,14 +38,25 @@ class UserDTO(BaseModel):
     company: Optional[str]
     addresses: List[AddressDTO]
 
-    async def from_user(user: User) -> "UserDTO":
+    async def from_model(user: User) -> "UserDTO":
         addresses = await user.awaitable_attrs.addresses
 
         return UserDTO(
             id=user.id,
             name=user.name,
             company=user.company,
-            addresses=[AddressDTO.from_address(address) for address in addresses],
+            addresses=[AddressDTO.from_model(address) for address in addresses],
+        )
+
+
+class TaskDTO(BaseModel):
+    id: int
+    description: str
+
+    async def from_model(task: Task) -> "TaskDTO":
+        return TaskDTO(
+            id=task.id,
+            description=task.description,
         )
 
 
@@ -62,3 +73,7 @@ class CreateUserDTO(BaseModel):
 class UpdateUserDTO(BaseModel):
     name: Optional[str] = None
     company: Optional[str] = None
+
+
+class CreateTaskDTO(BaseModel):
+    description: str

@@ -8,13 +8,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.controllers.common import CORRELATION_ID_HEADER
 from app.database import async_session_local
 from app.dtos import BasePaginationFilters
-from app.models import PagedResult
+from app.exceptions import UnauthorizedError
+from app.models import PagedResult, User
 
 
 @dataclass
 class Context:
     db: AsyncSession
     correlation_id: str
+    current_user: User
 
 
 async def get_db() -> AsyncGenerator:
@@ -24,13 +26,38 @@ async def get_db() -> AsyncGenerator:
 AsyncSessionDep = Annotated[AsyncSession, Depends(get_db)]
 
 
-async def get_context(request: Request, db: AsyncSessionDep) -> AsyncGenerator:
+async def get_request_user(db: AsyncSessionDep, request: Request) -> User:
+    """
+    There could be different ways of getting the request user. E.g:
+    - Parse a JWT token from the headers
+    - Parse the ID from the request path
+
+    To make it simple, we are just gonna retrieve the user ID sent on the
+    'Authorization' header
+    """
+
+    user_id = request.headers.get("Authorization")
+
+    if user_id is None:
+        raise UnauthorizedError("'Authorization' header is missing")
+
+    user = await db.scalar(select(User).where(User.id == int(user_id)))
+    if user is None:
+        raise UnauthorizedError("Invalid Authorization token")
+
+    return user
+
+RequestUserDep = Annotated[User, Depends(get_request_user)]
+
+
+async def get_context(request: Request, db: AsyncSessionDep, request_user: RequestUserDep) -> Context:
     """
     Build a context with a sqlalchemy session
     """
-    yield Context(
+    return Context(
         db=db,
         correlation_id=request.headers.get(CORRELATION_ID_HEADER),
+        current_user=request_user
     )
 
 

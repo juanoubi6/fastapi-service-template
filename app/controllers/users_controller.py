@@ -22,7 +22,7 @@ async def get_users(filters:  Annotated[UserFiltersDTO, Query()], ctx: ContextDe
         page=filters.page,
         page_size=filters.page_size,
         total_records=paged_users.total_records,
-        data=[await UserDTO.from_user(user) for user in paged_users.data],
+        data=[await UserDTO.from_model(user) for user in paged_users.data],
     )
 
     return page
@@ -32,20 +32,21 @@ async def get_users(filters:  Annotated[UserFiltersDTO, Query()], ctx: ContextDe
 async def get_user(user_id: int, ctx: ContextDep) -> Any:
     user = await user_service.get_user(ctx, user_id)
 
-    return await UserDTO.from_user(user)
+    return await UserDTO.from_model(user)
 
 
 @router.post("/", response_model=UserDTO, status_code=status.HTTP_201_CREATED)
 async def create_user(data: CreateUserDTO, ctx: ContextDep) -> Any:
     user = await user_service.create_user(ctx, data)
 
-    return await UserDTO.from_user(user)
+    return await UserDTO.from_model(user)
 
 
 @router.put("/{user_id}", response_model=UserDTO)
 async def update_user(user_id: int, data: UpdateUserDTO, ctx: ContextDep) -> Any:
     user = await user_service.update_user(ctx, user_id, data)
-    return await UserDTO.from_user(user)
+
+    return await UserDTO.from_model(user)
 
 
 @router.delete("/{user_id}")

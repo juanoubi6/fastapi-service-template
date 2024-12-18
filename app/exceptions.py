@@ -7,6 +7,13 @@ class CustomError(Exception):
     pass
 
 
+class UnauthorizedError(CustomError):
+    """
+    Thrown when Authorization headers aren't send
+    """
+    status_code = status.HTTP_401_UNAUTHORIZED
+
+
 class ResourceNotFoundError(CustomError):
     """
     Thrown when a resource cannot be found

@@ -33,6 +33,9 @@ class User(BaseDBModel):
     addresses: Mapped[List["Address"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
+    tasks: Mapped[List["Task"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
 
 
 class Address(BaseDBModel):
@@ -42,27 +45,14 @@ class Address(BaseDBModel):
     address_1: Mapped[str]
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
-    user: Mapped["User"] = relationship(back_populates="addresses")
+    user: Mapped[User] = relationship(back_populates="addresses")
 
 
-class AddressDTO(BaseModel):
-    id: int
-    address_1: str
+class Task(BaseDBModel):
+    __tablename__ = "tasks"
 
-    def from_address(address: Address) -> "AddressDTO":
-        return AddressDTO(id=address.id, address_1=address.address_1)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    description: Mapped[str]
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
-
-class UserDTO(BaseModel):
-    id: int
-    name: str
-    company: Optional[str]
-    addresses: List[AddressDTO]
-
-    def from_user(user: User) -> "UserDTO":
-        return UserDTO(
-            id=user.id,
-            name=user.name,
-            company=user.company,
-            addresses=[AddressDTO.from_address(address) for address in user.addresses],
-        )
+    user: Mapped[User] = relationship(back_populates="tasks")
