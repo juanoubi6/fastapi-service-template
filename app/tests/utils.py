@@ -2,7 +2,7 @@ import uuid
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import Address, User
+from app.models import Address, Task, User
 
 
 async def create_test_user_with_2_addresses(
@@ -19,3 +19,14 @@ async def create_test_user_with_2_addresses(
     await db.flush()
 
     return user
+
+
+async def create_test_task(db: AsyncSession, user: User) -> Task:
+    task = Task(
+        description="Test task",
+        user_id=user.id
+    )
+    db.add(task)
+    await db.flush()
+
+    return task

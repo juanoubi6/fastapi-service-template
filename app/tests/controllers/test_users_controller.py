@@ -10,7 +10,7 @@ from app.models import PagedResult
 from app.tests.utils import create_test_user_with_2_addresses
 
 
-class Test_UserService:
+class Test_UsersController:
     @pytest_asyncio.fixture(scope='class', autouse=True)
     async def test_data(self, db) -> dict:
         test_user = await create_test_user_with_2_addresses(db)
