@@ -17,21 +17,21 @@ class Context:
     correlation_id: str
 
 
-async def get_context(request: Request) -> AsyncGenerator:
+async def get_db() -> AsyncGenerator:
+    async with async_session_local() as async_session:
+        yield async_session
+
+AsyncSessionDep = Annotated[AsyncSession, Depends(get_db)]
+
+
+async def get_context(request: Request, db: AsyncSessionDep) -> AsyncGenerator:
     """
     Build a context with a sqlalchemy session
     """
-    session = async_session_local()
-
-    context = Context(
-        db=session,
+    yield Context(
+        db=db,
         correlation_id=request.headers.get(CORRELATION_ID_HEADER),
     )
-
-    try:
-        yield context
-    finally:
-        await session.close()
 
 
 ContextDep = Annotated[Context, Depends(get_context)]
