@@ -4,3 +4,4 @@ __pycache__/
 *$py.class
 **/__pycache__/
 .pytest_cache
+pgdata

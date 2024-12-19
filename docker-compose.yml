@@ -1,0 +1,35 @@
+services:
+    fastapi:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - "8000:80"
+        env_file:
+            - .env
+        environment:
+            - DB_SERVER=fastapi-postgres
+        depends_on:
+            fastapi-postgres:
+                condition: service_healthy
+    fastapi-postgres:
+        hostname: db
+        image: postgres:13
+        restart: always
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=password
+            - POSTGRES_DB=template
+        logging:
+            options:
+                max-size: 10m
+                max-file: "3"
+        ports:
+            - "5432:5432"
+        volumes:
+            - ./pgdata:/var/lib/postgresql/data
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres"]
+            interval: 5s
+            timeout: 5s
+            retries: 5
