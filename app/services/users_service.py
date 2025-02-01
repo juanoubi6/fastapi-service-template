@@ -4,6 +4,21 @@ from app.models import PagedResult, User
 from app.repositories.users_repository import UserRepository
 from app.utilities import Context
 
+"""
+Notes for myself
+
+## Why creating a repository layer if we are gonna have DB methods here?
+
+In case we need transactions at service layer. E.g: suppose we have to call
+an external service after creating the user. If the call fails, we should
+rollback the creation of the user. If the user was commited at the repository
+layer, we wouldn't be able to rollback its creation.
+
+## What is the repository layer used for?
+Creating DB objects won't be so simple every time. Abstracting all that
+code in another layer seems like a good idea to me.
+"""
+
 
 class UserService:
     def __init__(self, user_repository: UserRepository):

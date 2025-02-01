@@ -1,8 +1,22 @@
+import asyncio
 import uuid
+from unittest.mock import AsyncMock, MagicMock
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Address, Task, User
+
+
+def create_mock_from_class(spec_class: type) -> MagicMock:
+    mock = MagicMock(spec=spec_class)
+    # Convert all async methods to AsyncMock
+    for attr in dir(spec_class):
+        if not attr.startswith('_'):  # Skip private methods
+            method = getattr(spec_class, attr)
+            if asyncio.iscoroutinefunction(method):
+                setattr(mock, attr, AsyncMock())
+
+    return mock
 
 
 async def create_test_user_with_2_addresses(

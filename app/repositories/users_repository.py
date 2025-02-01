@@ -31,6 +31,14 @@ class UserRepository:
             user.addresses = [Address(address_1=addr.address_1)for addr in data.addresses]
 
         db.add(user)
+
+        """
+        The general rule is: only flush when you absolutely need the generated IDs or need to
+        verify constraints before proceeding with more operations in the same transaction.
+        Otherwise, let SQLAlchemy handle the flushes automatically during commit.
+
+        We are gonna assume we need the ID in the service layer.
+        """
         await db.flush()
 
         return user

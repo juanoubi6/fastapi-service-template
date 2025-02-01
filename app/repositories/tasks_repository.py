@@ -16,6 +16,5 @@ class TasksRepository:
         )
 
         ctx.db.add(task)
-        await ctx.db.flush()
 
         return task

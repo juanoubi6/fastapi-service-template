@@ -33,7 +33,7 @@ async def db() -> AsyncGenerator[AsyncSession, None, None]:
 
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
-async def request_user(db: AsyncSession) -> User:
+async def request_user(db: AsyncSession) -> AsyncGenerator[User, None, None]:
     # Create a test user and return it
     user = User(
         name=str(uuid.uuid4()),
@@ -43,7 +43,10 @@ async def request_user(db: AsyncSession) -> User:
     db.add(user)
     await db.commit()
 
-    return user
+    yield user
+
+    await db.delete(user)
+    await db.commit()
 
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
@@ -54,8 +57,8 @@ async def authorization_headers(request_user: User) -> dict[str, str]:
 
 
 @pytest_asyncio.fixture(scope="function")
-async def ctx(db: AsyncSession, request_user: User) -> Context:
-    return Context(
+async def ctx(db: AsyncSession, request_user: User) -> AsyncGenerator[Context, None, None]:
+    yield Context(
         db=db,
         correlation_id="test_correlation_id",
         current_user=request_user,

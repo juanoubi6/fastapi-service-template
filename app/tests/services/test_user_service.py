@@ -85,7 +85,7 @@ class Test_UserService:
         assert user_exists is False
 
     @pytest.mark.asyncio
-    async def test_get_user_by_id_success(self, ctx: Context, user_service: UserService, test_data: dict):
+    async def test_get_user_success(self, ctx: Context, user_service: UserService, test_data: dict):
         user = await user_service.get_user(ctx, test_data['test_user'].id)
 
         assert isinstance(user, User)
